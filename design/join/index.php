@@ -1,4 +1,8 @@
 <?php
+
+  // dbconnect.phpを読み込む
+  require('../dbconnect.php');
+
   // セッションを使うページに必ず入れる
   session_start();
 
@@ -7,9 +11,9 @@
 
 
   // エラー情報を保持する
-  $error = array();
+    $error = array();
       
-  if (isset($_POST) && !empty($_POST)){
+    if (isset($_POST) && !empty($_POST)){
 
     // ニックネームが未入力の場合
     if(empty($_POST['nick_name'])){
@@ -41,6 +45,18 @@
       if($ext != 'jpg' && $ext != 'gif' && $ext != 'png'){
       $error['picture_path'] = 'type';
     }
+    }
+
+    // 重複アカウントのチェック
+    if (empty($error)) {
+      $sql = sprintf('SELECT COUNT(*) AS cnt FROM members WHERE email = "%s"',
+       mysqli_real_escape_string($db, $_POST['email']) 
+        );
+      $record = mysqli_query($db,$sql) or die(mysqli_error($db));
+      $table = mysqli_fetch_assoc($record);
+      if($table['cnt'] > 0) {
+        $error['email'] = 'duplicate';
+      }
     }
 
     // エラーがない場合
@@ -124,7 +140,8 @@
     <div class="row">
       <div class="col-md-6 col-md-offset-3 content-margin-top">
         <legend>会員登録</legend>
-        <form method="post" action="" class="form-horizontal" role="form"= enctype"multipart/form-data">
+        <form method="post" action="" class="form-horizontal" role="form" enctype="multipart/form-data">
+      
           <!-- ニックネーム -->
           <div class="form-group">
             <label class="col-sm-4 control-label">ニックネーム</label>

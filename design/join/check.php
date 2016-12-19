@@ -1,10 +1,35 @@
 <?php
 session_start();
+
+// dbconnect.phpを読み込む
+require('../dbconnect.php'); //..　は下の階層に行くから　　　    
+
+
 // セッションにデータがなかったらindex.phpに遷移
 if (!isset($_SESSION['join'])){
   header('Location_: index.php');
   exit();
 }
+
+// DB登録処理（データがPOST送信されたら)
+if(!empty($_POST)){
+  // sql文を作成
+    $sql = sprintf('INSERT INTO  `members` SET `nick_name`="%s",`email`="%s",`password` ="%s",`picture_path`="%s", `created`= now()',
+    mysqli_real_escape_string ($db,$_SESSION['join']['nick_name']),
+    mysqli_real_escape_string ($db,$_SESSION['join']['email']),
+    mysqli_real_escape_string ($db,sha1($_SESSION['join']['password'])),
+    mysqli_real_escape_string ($db,($_SESSION['join']['picture_path'])));
+    
+    mysqli_query($db,$sql) or die(mysqli_error($db));
+    unset($_SESSION['join']);
+
+    header('Location:thanks.php');
+    exit();
+    
+
+    
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
